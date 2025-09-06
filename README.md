@@ -29,8 +29,6 @@
 - Lenguaje: **VHDL**.
 - Se adjunta enlace al repositorio y proyecto de síntesis (añadir aquí el URL).
 
-## Licencia
-MIT (o la que corresponda).
 
-## Autor
-Nombre del autor o equipo. Contacto opcional.
+## Autores
+Thomas Leal Puerta, Francisco Alejandro Quiroga Boshell
