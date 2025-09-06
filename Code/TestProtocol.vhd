@@ -1,0 +1,59 @@
+--LIBRARY IEEE;
+--LIBRARY IEEE;
+--USE IEEE.std_logic_1164.ALL;
+--USE IEEE.numeric_std.ALL;
+--
+--ENTITY TestProtocol IS
+--END TestProtocol;
+--
+--ARCHITECTURE TestProtocolArch OF TestProtocol IS
+--
+--    SIGNAL Selop : STD_LOGIC_VECTOR(1 DOWNTO 0);
+--    SIGNAL A     : STD_LOGIC_VECTOR(3 DOWNTO 0);
+--    SIGNAL B     : STD_LOGIC_VECTOR(3 DOWNTO 0);
+--    SIGNAL Q1    : STD_LOGIC_VECTOR(3 DOWNTO 0);
+--    SIGNAL Q2    : STD_LOGIC_VECTOR(3 DOWNTO 0);
+----    SIGNAL Q     : STD_LOGIC_VECTOR(7 DOWNTO 0);
+--
+--BEGIN
+--
+--    X1 : ENTITY WORK.FirstProject
+--        PORT MAP (
+--            Selop => Selop,
+--            A     => A ,
+--            B     => B ,
+--            Q1    => Q1,
+--            Q2    => Q2 
+----            Q     => Q
+--        );
+--
+--    A <= "0011" AFTER 20  ns,   -- 3
+--         "0100" AFTER 60  ns,   -- 4
+--         "0111" AFTER 100 ns,   -- 7
+--         "0001" AFTER 140 ns,   -- 1
+--         "0000" AFTER 180 ns,   -- 0
+--         "0001" AFTER 220 ns,   -- 1
+--         "1001" AFTER 260 ns,   -- 9
+--         "0101" AFTER 300 ns,   -- 5
+--         "0010" AFTER 340 ns,   -- 2
+--         "0110" AFTER 380 ns;   -- 6
+--
+--    B <= "0101" AFTER 20  ns,   -- 5
+--         "0010" AFTER 60  ns,   -- 2
+--         "1001" AFTER 100 ns,   -- 9
+--         "1001" AFTER 140 ns,   -- 9
+--         "0001" AFTER 180 ns,   -- 1
+--         "1000" AFTER 220 ns,   -- 8
+--         "0011" AFTER 260 ns,   -- 3
+--         "0000" AFTER 300 ns,   -- 0
+--         "0100" AFTER 340 ns,   -- 4
+--         "0110" AFTER 380 ns;   -- 6
+--
+--
+--    Selop <= "00" AFTER 20  ns,
+--             "01" AFTER 80  ns,
+--             "10" AFTER 120 ns,
+--             "11" AFTER 160 ns,
+--             "00" AFTER 200 ns;
+--
+--END TestProtocolArch;

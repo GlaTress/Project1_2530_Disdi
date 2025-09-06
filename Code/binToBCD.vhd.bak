@@ -1,0 +1,130 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY binToBCD IS
+  PORT (
+    N : IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
+    T : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+    U : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+  );
+END ENTITY;
+
+ARCHITECTURE behavioral OF binToBCD IS
+  -- Bits altos y bajos
+  SIGNAL hBits  : STD_LOGIC_VECTOR(2 DOWNTO 0);
+  SIGNAL lBits  : STD_LOGIC_VECTOR(3 DOWNTO 0);
+
+  -- Base T y tablas de ajuste
+  SIGNAL baseT  : STD_LOGIC_VECTOR(3 DOWNTO 0);
+  SIGNAL adjVal : STD_LOGIC_VECTOR(4 DOWNTO 0); -- 5 bits
+
+  -- Extensión y ajustes intermedios
+  SIGNAL extLB  : STD_LOGIC_VECTOR(4 DOWNTO 0); -- '0' & lBits
+
+  -- Señales de decisión para +20 / +10
+  SIGNAL adj20  : STD_LOGIC;
+  SIGNAL adj10  : STD_LOGIC;
+
+  -- Ajustes a T y U
+  SIGNAL tAdj   : STD_LOGIC_VECTOR(3 DOWNTO 0); -- 4 bits
+  SIGNAL uAdj   : STD_LOGIC_VECTOR(4 DOWNTO 0); -- 5 bits
+
+  -- Resultados finales parciales
+  SIGNAL finU   : STD_LOGIC_VECTOR(4 DOWNTO 0); -- 5 bits (para U)
+
+  -- Señales “anchas” para S de los adders (S es N downto 0)
+  SIGNAL intSum_w : STD_LOGIC_VECTOR(5 DOWNTO 0); -- N=5 -> 6 bits
+  SIGNAL finT_w   : STD_LOGIC_VECTOR(4 DOWNTO 0); -- N=4 -> 5 bits
+  SIGNAL res_w    : STD_LOGIC_VECTOR(6 DOWNTO 0); -- N=6 -> 7 bits
+
+  -- Buses de 6 bits para el tercer sumador
+  SIGNAL sum6   : STD_LOGIC_VECTOR(5 DOWNTO 0);
+  SIGNAL adj6   : STD_LOGIC_VECTOR(5 DOWNTO 0);
+BEGIN
+  -- Extraer bits
+  hBits <= N(6 DOWNTO 4);
+  lBits <= N(3 DOWNTO 0);
+
+  -- Lookup base T
+  WITH hBits SELECT
+    baseT <= "0000" WHEN "000",
+              "0001" WHEN "001",
+              "0011" WHEN "010",
+              "0100" WHEN "011",
+              "0110" WHEN "100",
+              "0111" WHEN "101",
+              "0000" WHEN OTHERS;
+
+  -- Lookup de ajuste
+  WITH hBits SELECT
+    adjVal <= "00000" WHEN "000",
+               "00110" WHEN "001",
+               "00010" WHEN "010",
+               "01000" WHEN "011",
+               "00100" WHEN "100",
+               "01010" WHEN "101",
+               "00000" WHEN OTHERS;
+
+  -- Extender low bits
+  extLB <= '0' & lBits; -- 5 bits
+
+  ------------------------------------------------------------
+  -- Primer sumador: 5 + 5 => S de 6 bits (incluye carry)
+  ------------------------------------------------------------
+  adder1: ENTITY work.RippleCAdder
+    GENERIC MAP (N => 5)
+    PORT MAP (
+      A    => adjVal,     -- 5 bits
+      B    => extLB,      -- 5 bits
+      Mode => '0',        -- suma
+      S    => intSum_w    -- 6 bits (N downto 0)
+    );
+
+  -- Condiciones de ajuste (usan solo los 5 LSB de intSum_w: [4..0])
+  adj20 <= intSum_w(4) AND (intSum_w(3) OR intSum_w(2));
+  adj10 <= ((NOT intSum_w(4)) AND intSum_w(3) AND (intSum_w(2) OR intSum_w(1)))
+        OR (intSum_w(4) AND (NOT (intSum_w(3) OR intSum_w(2))));
+
+  -- Ajuste a T
+  tAdj <= "0010" WHEN adj20 = '1' ELSE
+          "0001" WHEN adj10 = '1' ELSE
+          "0000";
+
+  ------------------------------------------------------------
+  -- Segundo sumador: 4 + 4 => S de 5 bits (incluye carry)
+  ------------------------------------------------------------
+  adder2: ENTITY work.RippleCAdder
+    GENERIC MAP (N => 4)
+    PORT MAP (
+      A    => baseT,   -- 4 bits
+      B    => tAdj,    -- 4 bits
+      Mode => '0',     -- suma
+      S    => finT_w   -- 5 bits (N downto 0)
+    );
+
+  -- Ajuste a U (+20, +10 o 0) en 5 bits
+  uAdj <= "10100" WHEN adj20 = '1' ELSE
+          "01010" WHEN adj10 = '1' ELSE
+          "00000";
+
+  -- Entradas al tercer sumador (6 bits)
+  sum6 <= intSum_w;       -- 6 bits: toma los 6 bits (incluye carry real del adder1)
+  adj6 <= '0' & uAdj;     -- 6 bits: 0 + 5 bits de ajuste
+
+  ------------------------------------------------------------
+  -- Tercer sumador: 6 + 6 => S de 7 bits (incluye carry)
+  ------------------------------------------------------------
+  adder3: ENTITY work.RippleCAdder
+    GENERIC MAP (N => 6)
+    PORT MAP (
+      A    => sum6,   -- 6 bits
+      B    => adj6,   -- 6 bits
+      Mode => '1',    -- (confirma si '1' es resta o suma según tu diseño)
+      S    => res_w   -- 7 bits (N downto 0)
+    );
+
+  -- Salidas finales (se descarta el carry)
+  T <= finT_w(3 DOWNTO 0);
+  finU <= res_w(4 DOWNTO 0);
+  U <= finU(3 DOWNTO 0);
+END ARCHITECTURE;

@@ -1,0 +1,53 @@
+
+
+LIBRARY IEEE;
+USE IEEE.std_logic_1164.ALL;
+USE IEEE.numeric_std.ALL;
+
+ENTITY TestProtocol IS
+END TestProtocol;
+
+ARCHITECTURE TestProtocolArch OF TestProtocol IS
+
+SIGNAL OpCode :     STD_LOGIC_VECTOR(3 DOWNTO 0);
+SIGNAL A :          STD_LOGIC_VECTOR(4   DOWNTO 0);
+SIGNAL B :          STD_LOGIC_VECTOR(4   DOWNTO 0);
+SIGNAL C :          STD_LOGIC_VECTOR(3 DOWNTO 0);
+SIGNAL Result :     STD_LOGIC_VECTOR(11 DOWNTO 0);
+
+BEGIN
+
+X1 : ENTITY WORK.FirstProject
+
+PORT MAP   (OpCode => OpCode,
+            A  => A,
+            B => B,
+            C => C,
+            Result => Result
+           );
+
+A      <=  "00001" AFTER 20  ns;
+
+B      <=  "11111" AFTER 20  ns;
+
+C      <=  "0111"  AFTER 20  ns;
+
+OpCode <=  "0000"  AFTER 20  ns,
+           "0001"  AFTER 40  ns,
+           "0010"  AFTER 60  ns,
+           "0011"  AFTER 80  ns,
+           "0100"  AFTER 100 ns,
+           "0101"  AFTER 120 ns,
+           "0110"  AFTER 140 ns,
+           "0111"  AFTER 160 ns,
+           "1000"  AFTER 180 ns,
+           "1001"  AFTER 200 ns,
+           "1010"  AFTER 220 ns,
+           "1011"  AFTER 240 ns,
+           "1100"  AFTER 260 ns,
+           "1101"  AFTER 280 ns,
+           "1110"  AFTER 300 ns,
+           "1111"  AFTER 320 ns;
+
+
+END TestProtocolArch;
