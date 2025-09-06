@@ -27,7 +27,6 @@
 ## Implementación
 - Plataforma: **DE0**.
 - Lenguaje: **VHDL**.
-- Se adjunta enlace al repositorio y proyecto de síntesis (añadir aquí el URL).
 
 
 ## Autores
